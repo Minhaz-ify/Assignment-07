@@ -5,8 +5,13 @@ import { signIn } from "@/lib/auth-client";
 export default function SocialButtons({ callbackURL = "/" }) {
   async function social(provider, label) {
     try {
-      await signIn.social({ provider, callbackURL });
-    } catch {
+      const { error } = await signIn.social({ provider, callbackURL });
+      if (error) {
+        console.error(error);
+        toast.error(error.message || `${label} দিয়ে চালিয়ে যাওয়া যায়নি`);
+      }
+    } catch (e) {
+      console.error(e);
       toast.error(`${label} দিয়ে চালিয়ে যাওয়া যায়নি`);
     }
   }
