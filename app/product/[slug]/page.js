@@ -45,7 +45,7 @@ export default async function ProductPage({ params }) {
   const priced = p.markets.filter((m) => m.price !== null);
   const cheapest = priced.length ? priced.reduce((a, b) => (b.price < a.price ? b : a)) : null;
   const costliest = priced.length ? priced.reduce((a, b) => (b.price > a.price ? b : a)) : null;
-  const maxPrice = p.max ?? costliest?.price ?? 0;
+  const maxPrice = p.max ?? costliest?.max ?? 0;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -107,34 +107,34 @@ export default async function ProductPage({ params }) {
               <thead>
                 <tr className="text-base-content/60">
                   <th>বাজার</th>
-                  <th className="min-w-40">আজকের দাম</th>
-                  <th className="text-right">পরিবর্তন</th>
+                  <th>সর্বনিম্ন</th>
+                  <th>সর্বাধিক</th>
+                  <th className="min-w-40">গড়</th>
                 </tr>
               </thead>
               <tbody>
-                {p.markets.map((m, i) => {
-                  const dir = m.change > 0 ? "up" : m.change < 0 ? "down" : "flat";
-                  return (
-                    <tr key={`${m.name}-${i}`}>
-                      <td className="font-medium">
+                {p.markets.map((m, i) => (
+                  <tr key={`${m.name}-${i}`}>
+                    <td>
+                      <p className="font-medium">
                         {m.name}
                         {m === cheapest && <span className="ml-2 text-xs text-[#1a9951]">● কম</span>}
                         {m === costliest && <span className="ml-2 text-xs text-[#d03739]">● বেশি</span>}
-                      </td>
-                      <td>
-                        <p className="font-semibold">{m.price === null ? "—" : taka(m.price)}</p>
-                        {m.price !== null && maxPrice > 0 && (
-                          <div className="mt-1 h-1.5 w-full max-w-40 rounded-full bg-base-200">
-                            <div className="h-1.5 rounded-full bg-primary" style={{ width: `${Math.max(8, Math.round((m.price / maxPrice) * 100))}%` }} />
-                          </div>
-                        )}
-                      </td>
-                      <td className="text-right">
-                        {m.change === null ? "—" : <ChangeBadge dir={dir} change={Math.abs(m.change)} />}
-                      </td>
-                    </tr>
-                  );
-                })}
+                      </p>
+                      {m.division && <p className="text-xs text-base-content/60">{m.division}</p>}
+                    </td>
+                    <td className="text-[#1a9951]">{m.min === null ? "—" : taka(m.min)}</td>
+                    <td className="text-[#d03739]">{m.max === null ? "—" : taka(m.max)}</td>
+                    <td>
+                      <p className="font-semibold">{m.price === null ? "—" : taka(m.price)}</p>
+                      {m.price !== null && maxPrice > 0 && (
+                        <div className="mt-1 h-1.5 w-full max-w-40 rounded-full bg-base-200">
+                          <div className="h-1.5 rounded-full bg-primary" style={{ width: `${Math.max(8, Math.min(100, Math.round((m.price / maxPrice) * 100)))}%` }} />
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
